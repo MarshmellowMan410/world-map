@@ -63,16 +63,16 @@ table{border-collapse:collapse;width:100%;font-size:.78rem;text-align:center}td,
 .name{font-size:1.75rem;line-height:1.3;margin:0}.name.swap{animation:popIn .4s both}
 .bar{height:5px;background:var(--p2);border-radius:9px;overflow:hidden;margin:4px 0}.bar i{display:block;height:100%;width:100%;background:#e0ab4c}.bar.low i{background:var(--bad);animation:blink .6s infinite}
 .msg{min-height:1.4em;font-size:.95rem}.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}.msg.pop{animation:popIn .35s both}
-.full{color:var(--mut);font-size:.82rem;min-height:1.1em}
+.full{color:var(--mut);font-size:.82rem;min-height:1.1em}#pat{color:var(--brass);min-height:0}#pat:empty{display:none}
 .sprog{display:flex;align-items:center;gap:5px;justify-content:center;font-size:.8rem;color:var(--brass);margin-top:4px}
 .sd{width:12px;height:12px;border-radius:50%;background:#3a4452;display:inline-block}.sd.cur{background:var(--brass);animation:glow 1.2s infinite}.sd.ok{background:var(--ok);animation:popIn .3s}.sd.bad{background:var(--bad);animation:popIn .3s}
 .x{background:none;border:0;color:var(--mut);cursor:pointer}
 .sum{animation:fadeUp .4s both;text-align:left}.sum .big{text-align:center;font-size:1.5rem;color:var(--brass);animation:popIn .5s both}
 .sum li{list-style:none;padding:3px 6px;border-radius:6px;margin:2px 0;font-size:.85rem;animation:slideR .35s both;animation-delay:calc(var(--i)*70ms)}.sum li.ok{background:#16d16a22}.sum li.bad{background:#ff3b5c22}.sum ul{padding:0;margin:6px 0}
-.mapwrap{position:relative;background:#fff;border-radius:12px;overflow:hidden;border:1px solid var(--line);animation:fadeUp .5s both}
+.mapwrap{position:relative;background:#cfe5f2;border-radius:12px;overflow:hidden;border:1px solid var(--line);animation:fadeUp .5s both}
 .mapwrap.ok{animation:flashOk .9s}.mapwrap.bad{animation:flashBad .9s,shake .4s}
-svg#map{display:block;width:100%;height:auto;max-height:calc(100vh - 70px);margin:auto;touch-action:none;cursor:crosshair;background:#fff}
-.land{fill:#fff;stroke:#222;stroke-width:.7;vector-effect:non-scaling-stroke}
+svg#map{display:block;width:100%;height:auto;max-height:calc(100vh - 70px);margin:auto;touch-action:none;cursor:crosshair;background:#cfe5f2}
+.land{fill:#fbf8ee;stroke:#222;stroke-width:.7;vector-effect:non-scaling-stroke}
 .hl{fill-opacity:.7;stroke:#065f2c;stroke-width:1.4;vector-effect:non-scaling-stroke;animation:hlPulse 1s ease 2}.hl.heat{animation:fadeIn .6s both;fill-opacity:.6}
 #ov{pointer-events:none;transition:opacity .2s}
 .mapbtns{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px}
@@ -96,6 +96,7 @@ svg#map{display:block;width:100%;height:auto;max-height:calc(100vh - 70px);margi
    <div class="row">සිතියමේ නම් (ඊතල සමඟ)<button class="sw" id="sLabel"></button></div>
    <div class="row">දත්ත සටහන් කිරීම<button class="sw" id="sTrack"></button></div>
    <div class="row">කාල සීමාව<span><select id="secs"><option>10</option><option>15</option><option>30</option><option>60</option></select> <button class="sw" id="sTime"></button></span></div>
+   <div class="row">ක්ලික් නිරවද්‍යතාව<select id="tolSel"><option value="0.5">දැඩි</option><option value="1">සාමාන්‍ය</option><option value="1.6">ලිහිල්</option></select></div>
    <h3>ප්‍රශ්න අසන්නේ කුමන ප්‍රවර්ග වලින්ද?</h3><div id="cats"></div>
    <div class="acts"><button class="btn" id="allOn">සියල්ල තෝරන්න</button><button class="btn" id="allOff">සියල්ල ඉවත් කරන්න</button></div>
   </div>
@@ -111,7 +112,7 @@ svg#map{display:block;width:100%;height:auto;max-height:calc(100vh - 70px);margi
  <section class="card q" id="q">
   <div class="chips"><span class="chip">ලකුණු: <b id="nOk">0</b> / <b id="nAsk">0</b></span><span class="chip">වැරදි: <b id="nBad">0</b></span><span class="chip" id="strChip">දිගටම: <b id="nStr">0</b></span></div>
   <div class="sprog" id="sprog" hidden></div>
-  <div id="qbody"><div class="tag" id="tag"></div><div class="name" id="name">…</div>
+  <div id="qbody"><div class="full" id="pat"></div><div class="tag" id="tag"></div><div class="name" id="name">…</div>
   <div class="bar" id="bar" hidden><i></i></div>
   <div class="msg" id="msg"></div><div class="full" id="full"></div>
   <div class="acts"><button class="btn main" id="next">ඊළඟ ප්‍රශ්නය</button><button class="btn" id="skip">මඟහරින්න</button></div></div>
@@ -237,11 +238,12 @@ function drawMark(p,x,y,ok,anim){const grp=el('g',anim?{class:'svg-pop'}:null,p)
  else{if(anim)el('circle',{class:'pulse-ring',cx:x,cy:y,r:13,fill:'none',stroke:'#ff1f45','stroke-width':4},p);el('circle',{cx:x,cy:y,r:13,fill:'#e5173c',stroke:'#fff','stroke-width':3.5},grp);el('path',{d:`M${x-5} ${y-5}L${x+5} ${y+5}M${x+5} ${y-5}L${x-5} ${y+5}`,fill:'none',stroke:'#fff','stroke-width':3.4,'stroke-linecap':'round'},grp)}}
 function redrawOv(anim){ovE.innerHTML='';ovE.style.opacity=1;if(!oc)return;const u=uPx(),t=d3.zoomTransform(svg.node());ovE.setAttribute('transform','scale('+u+')');
  const P=a=>{const q=t.apply(a);return[q[0]/u,q[1]/u]};
+ (oc.circ||[]).forEach(c=>{const q=P(c.a);el('circle',{class:anim?'svg-pop':'',cx:q[0],cy:q[1],r:c.r*t.k/u,fill:'#16d16a','fill-opacity':.1,stroke:'#16a34a','stroke-width':1.5,'stroke-dasharray':'5 4'},ovE)});
  drawLabels(ovE,W/u,H/u,oc.items.map(o=>{const q=P(o.a);return Object.assign({},o,{x:q[0],y:q[1]})}),anim);
  (oc.rings||[]).forEach(a=>{if(!anim)return;const q=P(a);el('circle',{class:'pulse-ring',cx:q[0],cy:q[1],r:10,fill:'none',stroke:oc.rc,'stroke-width':3},ovE)});
  (oc.marks||[]).forEach(m=>{const q=P(m.a);drawMark(ovE,q[0],q[1],m.ok,anim)})}
 function showItem(it,col,click){const gc=col==='sel'?'#38bdf8':'#16d16a';paint(it,gc);const a=anchor(it);let b=bnds(it);
- oc={items:[{a,text:S.label?it.names[0]:'',color:col,big:true}],rings:[a],rc:gc,marks:[]};
+ oc={items:[{a,text:S.label?it.names[0]:'',color:col,big:true}],rings:[a],rc:gc,marks:[],circ:(it.k==='pt'||(it.k!=='s'&&tier(it)===2))?[{a,r:tolMap()}]:[]};
  if(click){oc.marks.push({a:click.pt,ok:click.ok});if(!click.ok){b=[[Math.min(b[0][0],click.pt[0]),Math.min(b[0][1],click.pt[1])],[Math.max(b[1][0],click.pt[0]),Math.max(b[1][1],click.pt[1])]];if(click.other)oc.items.push({a:click.pt,text:S.label?click.other.names[0]:'',color:'miss'})}}
  zTo(fitTo(b),true)}
 /* ---- ශබ්ද ---- */
@@ -255,7 +257,7 @@ streak(){if(ok())[523.25,659.25,783.99,1046.5].forEach((f,i)=>t(f,.2+i*.08,.22,{
 
 /* ---- සැකසුම් සහ දත්ත ---- */
 const ld=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
-const S=Object.assign({sound:true,label:true,time:false,secs:15,track:true},ld('wmq_s',{}));
+const S=Object.assign({sound:true,label:true,time:false,secs:15,track:true,tol:1},ld('wmq_s',{}));
 let off=new Set(ld('wmq_off',[]).filter(k=>BYID[k])),EV=ld('wmq_ev',[]).filter(e=>e&&BYID[e.k]),lastSer=ld('wmq_last',[]),stC=null,SESS=Date.now();
 const saveS=()=>{sv('wmq_s',S);sv('wmq_off',[...off])};
 const retrig=(e,c)=>{e.classList.remove(c);void e.offsetWidth;e.classList.add(c)};
@@ -271,7 +273,7 @@ function calc(){const byKey={},byCat={},ses=new Map(),cf={};let att=0,ok=0,ds=0,
 const ST=()=>stC||(stC=calc()),lv=id=>{const s=ST().byKey[id];return!s?'n':s.mastered?'m':s.weak?'w':'l'},LVN={n:'අලුත්',l:'ඉගෙනගන්නා',w:'දුර්වල',m:'ප්‍රගුණයි'};
 const sw=(id,key,cb)=>{const b=$(id);b.classList.toggle('on',!!S[key]);b.onclick=()=>{S[key]=!S[key];b.classList.toggle('on',S[key]);saveS();Snd.tick();cb&&cb()}};
 sw('#sSound','sound');sw('#sLabel','label',()=>{if(cur&&cur.done&&!heatOn)showItem(cur.item,'hit',cur.click)});sw('#sTrack','track');sw('#sTime','time',()=>{if(!S.time){clearTimeout(tmr);$('#bar').hidden=true}});
-$('#secs').value=S.secs;$('#secs').onchange=e=>{S.secs=+e.target.value;saveS()};
+$('#secs').value=S.secs;$('#secs').onchange=e=>{S.secs=+e.target.value;saveS()};$('#tolSel').value=S.tol;$('#tolSel').onchange=e=>{S.tol=+e.target.value;saveS()};
 $$('.tabs button').forEach(b=>b.onclick=()=>{$$('.tabs button').forEach(x=>x.classList.toggle('on',x===b));$$('.tab').forEach(t=>t.classList.toggle('on',t.id===b.dataset.t));Snd.tick();const h=b.dataset.t==='t4';if(h!==heatOn){heatOn=h;if(h){foc=null;renderAn()}else leaveHeat()}else if(h)renderAn()});
 /* ---- ලැයිස්තු ---- */
 const grp=(c,its,full)=>`<details ${full?'':'open'}><summary>${c.name}</summary>${its.map(i=>`<div class="it"><input type="checkbox" data-i="${i.id}"><span class="dot" data-d="${i.id}"></span>${full?`<span>${esc(i.names.join(' ('))+(i.names.length>1?')':'')}</span>`:`<button class="nm" data-show="${i.id}">${esc(i.names.join(' ('))+(i.names.length>1?')':'')}</button>`}</div>`).join('')}</details>`;
@@ -310,24 +312,37 @@ $('#gStart').onclick=()=>startSeries('gen');$('#gWeak').onclick=()=>startSeries(
 /* ---- ප්‍රශ්න ---- */
 let cur=null,tmr,t0=0,ser=null;const sc={ok:0,ask:0,bad:0,str:0};
 const fullName=i=>i.names[0]+(i.names.length>1?' ('+i.names.slice(1).join(', ')+')':'');
-const tolPx=()=>innerWidth<700?24:16;
+const tolMap=()=>Math.max(34*S.tol,24*uPx());
 function setScore(b){[['nOk',sc.ok],['nAsk',sc.ask],['nBad',sc.bad],['nStr',sc.str]].forEach(([id,v])=>{const e=$('#'+id);if(e.textContent!=v){e.textContent=v;if(b)retrig(e,'bump')}});$('#strChip').classList.toggle('hot',sc.str>=3)}
 function renderDots(){const sp=$('#sprog');sp.hidden=!ser;if(!ser)return;sp.innerHTML='<span>ප්‍රශ්නය '+Math.min(ser.i+1,ser.items.length)+' / '+ser.items.length+'</span>'+ser.items.map((_,i)=>'<i class="sd '+(ser.res[i]?(ser.res[i].ok?'ok':'bad'):i===ser.i?'cur':'')+'"></i>').join('')+'<button class="x" id="exit" title="නවත්වන්න">✕</button>';$('#exit').onclick=()=>exitSeries()}
 function startSeries(kind){const b=buildSeries(kind);if(!b)return;Snd.start();ser={items:b.items,i:0,res:[],kind};lastSer=b.items.map(i=>i.id);sv('wmq_last',lastSer);SESS=Date.now();Object.assign(sc,{ok:0,ask:0,bad:0,str:0});setScore();$('#sum').hidden=true;$('#qbody').hidden=false;
- $('#tag').textContent='';ask();$('#full').textContent=(kind==='weak'?'දුර්වල ස්ථාන පුහුණුව':'මෙවර සැකැස්ම: ')+(kind==='weak'?'':YC.filter(c=>b.pat[c]).map(c=>CN[c]+' '+b.pat[c]).join(' · '))}
-function exitSeries(){ser=null;SESS=Date.now();Object.assign(sc,{ok:0,ask:0,bad:0,str:0});setScore();$('#sum').hidden=true;$('#qbody').hidden=false;ask()}
-function ask(){clearTimeout(tmr);oc=null;clearHL();if(!heatOn)zTo(d3.zoomIdentity,false,500);const m=$('#msg');m.textContent='';m.className='msg';if(!ser||!ser.res.length)$('#full').textContent='';renderDots();$('#bar').hidden=true;$('#next').textContent='ඊළඟ ප්‍රශ්නය';
+ $('#tag').textContent='';ask();$('#pat').textContent=kind==='weak'?'දුර්වල ස්ථාන පුහුණුව':'මෙවර සැකැස්ම: '+YC.filter(c=>b.pat[c]).map(c=>CN[c]+' '+b.pat[c]).join(' · ')}
+function exitSeries(){ser=null;$('#pat').textContent='';SESS=Date.now();Object.assign(sc,{ok:0,ask:0,bad:0,str:0});setScore();$('#sum').hidden=true;$('#qbody').hidden=false;ask()}
+function ask(){clearTimeout(tmr);oc=null;clearHL();if(!heatOn)zTo(d3.zoomIdentity,false,500);const m=$('#msg');m.textContent='';m.className='msg';$('#full').textContent='';renderDots();$('#bar').hidden=true;$('#next').textContent='ඊළඟ ප්‍රශ්නය';
  let it;if(ser){if(ser.i>=ser.items.length)return showSum();it=ser.items[ser.i]}
  else{const pool=ITEMS.filter(i=>!off.has(i.id));if(!pool.length){cur=null;$('#name').textContent='—';$('#tag').textContent='';flashMsg('කරුණාකර අවම වශයෙන් එක් ස්ථානයක් තෝරන්න');return}const p2=pool.length>1?pool.filter(i=>!cur||i!==cur.item):pool;it=wsample(p2,wGen)}
  const nm=it.names[Math.floor(Math.random()*it.names.length)];cur={item:it,done:false};t0=Date.now();
  $('#name').textContent=nm;retrig($('#name'),'swap');$('#tag').textContent=it.cat.name+' — සිතියමෙන් සොයා ක්ලික් කරන්න';
  if(S.time){const b=$('#bar'),f=b.firstElementChild;b.hidden=false;b.classList.remove('low');f.style.transition='none';f.style.width='100%';void f.offsetWidth;f.style.transition='width '+S.secs+'s linear';f.style.width='0%';setTimeout(()=>b.classList.add('low'),S.secs*750);tmr=setTimeout(()=>{if(cur&&!cur.done){Snd.time();finish(false,null,true)}},S.secs*1000)}}
-function hit(it,p,tol){const t=d3.zoomTransform(svg.node()),ll=proj.invert(t.invert(p));if(!ll)return false;
- if(it.k==='pt'){let b=null,bd=1e9;ITEMS.forEach(o=>{if(o.k!=='pt')return;const q=t.apply(proj(o.ll)),d=Math.hypot(q[0]-p[0],q[1]-p[1]);if(d<bd){bd=d;b=o}});return b===it&&bd<=tol}
- if(!it.ps.some(x=>d3.geoContains(x,ll)))return false;return it.k==='s'?!world.some(f=>d3.geoContains(f,ll)):true}
-svg.on('click',e=>{if(heatOn||!cur||cur.done)return;Snd.unlock();const p=d3.pointer(e,svg.node());finish(hit(cur.item,p,tolPx()*uPx()),p)});
+const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+function sd(q,a,b){const dx=b[0]-a[0],dy=b[1]-a[1],l=dx*dx+dy*dy;let t=l?((q[0]-a[0])*dx+(q[1]-a[1])*dy)/l:0;t=Math.max(0,Math.min(1,t));return Math.hypot(q[0]-a[0]-t*dx,q[1]-a[1]-t*dy)}
+function prj(it){return it._pr||(it._pr=it.ps.map(p=>{const rs=p.geometry.coordinates.map(r=>r.map(c=>proj(c)));let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;rs[0].forEach(c=>{x0=Math.min(x0,c[0]);y0=Math.min(y0,c[1]);x1=Math.max(x1,c[0]);y1=Math.max(y1,c[1])});return{rs,bb:[x0,y0,x1,y1]}}))}
+const near=(it,q,tol)=>prj(it).some(p=>q[0]>p.bb[0]-tol&&q[0]<p.bb[2]+tol&&q[1]>p.bb[1]-tol&&q[1]<p.bb[3]+tol&&p.rs.some(r=>{for(let i=1;i<r.length;i++)if(sd(q,r[i-1],r[i])<=tol)return true;return false}));
+const tier=it=>{if(it._t===undefined){const z=Math.max(...prj(it).map(p=>Math.max(p.bb[2]-p.bb[0],p.bb[3]-p.bb[1])));it._t=z<14?2:z<40?1:0}return it._t};
+const onLand=ll=>world.some(f=>d3.geoContains(f,ll));
+/* ක්ලික් පරීක්ෂාව: සිතියමේ ඒකක වලින් (විශාල නොකළ සිතියමට අනුව), විශාල කළත් වෙනස් නොවේ */
+function hit(it,q,tol){const ll=proj.invert(q);if(!ll)return false;
+ if(it.k==='pt'){const tg=proj(it.ll),dT=dist(q,tg);if(dT>tol)return false;let dO=1e9;ITEMS.forEach(o=>{if(o===it||o.k!=='pt')return;const c=proj(o.ll);if(dist(c,tg)<tol*.25)return;dO=Math.min(dO,dist(q,c))});return dT<=dO*1.2}
+ const inside=it.ps.some(x=>d3.geoContains(x,ll));
+ if(it.k==='s')return !onLand(ll)&&(inside||near(it,q,tol*.5));
+ if(inside)return true;
+ if(!onLand(ll))return near(it,q,tol);
+ const t=tier(it);return t>=2?near(it,q,tol):t===1&&near(it,q,tol*.5)}
+function otherAt(it,q,tol){const ll=proj.invert(q);let b=null,bd=1e9;ITEMS.forEach(o=>{if(o===it||o.k!=='pt')return;const d=dist(q,proj(o.ll));if(d<bd){bd=d;b=o}});if(b&&bd<=tol*.45)return b;
+ if(!ll)return null;const L=onLand(ll);return ITEMS.find(o=>o!==it&&o.k!=='pt'&&(o.k==='s'?!L:true)&&o.ps.some(x=>d3.geoContains(x,ll)))||null}
+svg.on('click',e=>{if(heatOn||!cur||cur.done)return;Snd.unlock();const p=d3.pointer(e,svg.node());finish(hit(cur.item,d3.zoomTransform(svg.node()).invert(p),tolMap()),p)});
 function finish(ok,p,timeout){if(!cur||cur.done)return;cur.done=true;clearTimeout(tmr);$('#bar').hidden=true;const it=cur.item,d=Math.round((Date.now()-t0)/100)/10;let other=null,pt=null;
- if(p){pt=d3.zoomTransform(svg.node()).invert(p);if(!ok){const tl=tolPx()*uPx();other=ITEMS.find(o=>o!==it&&hit(o,p,tl))||null}}
+ if(p){pt=d3.zoomTransform(svg.node()).invert(p);if(!ok)other=otherAt(it,pt,tolMap())}
  sc.ask++;if(ok){sc.ok++;sc.str++;Snd.ok(sc.str);if(sc.str%5===0)Snd.streak()}else{sc.bad++;sc.str=0;if(!timeout)Snd.bad()}
  if(S.track){EV.push({t:Date.now(),k:it.id,ok:ok?1:0,d,s:SESS,c:other?other.id:undefined});if(EV.length>6000)EV.splice(0,EV.length-6000);sv('wmq_ev',EV);stC=null;updDots()}
  if(ser){ser.res.push({it,ok});renderDots();if(ser.i>=ser.items.length-1)$('#next').textContent='ප්‍රතිඵල බලන්න'}
