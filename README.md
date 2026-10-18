@@ -1,4 +1,4 @@
 # world-map
 
-#World Map
-https://marshmellowman410.github.io/world-map/
+#World Map <br>
+https://marshmellowman410.github.io/srilanka-map-tool/
